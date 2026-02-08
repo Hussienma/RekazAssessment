@@ -7,7 +7,7 @@ namespace SimpleDrive.Controllers;
 
 [ApiController]
 [Route("v1/[controller]")]
-public class BlobController : Controller
+public class BlobController : ControllerBase
 {
     private readonly IStorageService _storageService;
     public BlobController(IStorageService storageService)
@@ -21,8 +21,19 @@ public class BlobController : Controller
         var response = await _storageService.UploadFileAsync(request.id, request.data);
 
         if(!response.Success)
-        return BadRequest(response.Message);
+            return BadRequest(response.Message);
 
-        return Ok("File uploaded");
+        return Ok(response.Value);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetFileById(string id)
+    {
+        var response = await _storageService.GetFileById(id);
+
+        if(!response.Success)
+        return NotFound(response.Message);
+
+        return Ok(response.Value);
     }
 }

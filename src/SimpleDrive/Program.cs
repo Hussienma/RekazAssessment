@@ -14,7 +14,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IStorageService, S3StorageService>();
 builder.Services.AddScoped<IFileDao, FileDao>();
 builder.Services.AddSingleton<ISignatureProvider, SignatureProvider>();
-builder.Services.AddSingleton<IAuthorizationProvider, AuthorizationProvider>();
+builder.Services.AddSingleton<IS3RequestProvider, S3RequestProvider>();
 builder.Services.AddControllers();
 
 var app = builder.Build();

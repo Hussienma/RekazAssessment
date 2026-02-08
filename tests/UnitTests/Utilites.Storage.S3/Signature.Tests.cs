@@ -27,7 +27,7 @@ public class StorageTests
     [InlineData("GET", "/", "max-keys=2&prefix=J", "Host: examplebucket.s3.amazonaws.com\nx-amz-date: 20130524T000000Z\nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n", "", "us-east-1", "s3", "34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7")]
     public void SignatureProvider_GetSignature_ReturnsExpectedSignature(string method, string path, string queries, string headers, string payload, string region, string service, string expected)
     {
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
     {"S3:AccessKeySecret", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"},
 };
 
@@ -53,7 +53,7 @@ public class StorageTests
             .Setup(s => s.GetSignature(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Returns(dummySignature);
 
-        var inMemorySettings = new Dictionary<string, string> {
+        var inMemorySettings = new Dictionary<string, string?> {
     {"S3:AccessKeyID", "access-key-id"},
 };
 
@@ -61,7 +61,7 @@ public class StorageTests
             .AddInMemoryCollection(inMemorySettings)
             .Build();
 
-        var serviceClient = new AuthorizationProvider(configuration, mockSignatureProvider.Object);
+        var serviceClient = new S3RequestProvider(configuration, mockSignatureProvider.Object);
         DateTime utcNow = DateTime.UtcNow;
         string date = utcNow.ToString("yyyyMMdd");
 

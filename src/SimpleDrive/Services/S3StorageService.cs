@@ -1,35 +1,54 @@
 using SimpleDrive.DTOs;
+using SimpleDrive.Common;
 using SimpleDrive.Entities;
 using SimpleDrive.Interfaces;
-using SimpleDrive.Storage.S3.Utils;
 
 namespace SimpleDrive.Services;
 
 public class S3StorageService : IStorageService
 {
     IFileDao _dao;
-    IAuthorizationProvider _authorizationProvider;
+    IS3RequestProvider _s3RequestProvider;
     HttpClient _httpClient;
 
-    public S3StorageService(IFileDao dao, HttpClient httpClient, IAuthorizationProvider authorizationProvider)
+    public S3StorageService(IFileDao dao, HttpClient httpClient, IS3RequestProvider authorizationProvider)
     {
         _dao = dao;
         _httpClient = httpClient;
-        _authorizationProvider = authorizationProvider;
+        _s3RequestProvider = authorizationProvider;
     }
 
-    public Task<string> RetrieveFileAsync(string id)
+    public async Task<Result<GetFileResponse>> GetFileById(string id)
     {
-        throw new NotImplementedException();
+        var fileMetadata = await _dao.GetById(id);
+
+        if (fileMetadata is null) return Result<GetFileResponse>.Failure("File not found");
+
+        var fileRequest = _s3RequestProvider.Get(id);
+
+        var response = await _httpClient.SendAsync(fileRequest);
+
+        if(!response.IsSuccessStatusCode) return Result<GetFileResponse>.Failure("File not found in bucket");
+
+        string fileContent = await response.Content.ReadAsStringAsync();
+        GetFileResponse file = new GetFileResponse()
+        {
+            Id = fileMetadata.Id,
+            CreateAt = fileMetadata.CreatedAt,
+            Size = fileMetadata.Size,
+            Data = fileContent
+        };
+
+        return Result<GetFileResponse>.Ok(file);
     }
 
-    public async Task<ServiceResult> UploadFileAsync(string id, string data)
+    public async Task<Result<FileMetadata>> UploadFileAsync(string id, string data)
     {
-        if (string.IsNullOrWhiteSpace(id)) return ServiceResult.Failure("ID is required");
+        if (string.IsNullOrWhiteSpace(id)) return Result<FileMetadata>.Failure("ID is required");
 
         FileMetadata file = await _dao.GetById(id);
 
-        if (file != null) return ServiceResult.Failure("ID is already in use");
+        if (file != null) return Result<FileMetadata>.Failure("ID is already in use");
 
         file = new FileMetadata()
         {
@@ -38,49 +57,18 @@ public class S3StorageService : IStorageService
             CreatedAt = DateTime.Now
         };
 
-
-        // DateTime timestampUTC = DateTime.UtcNow;
-        // string authorizationHeader = _authorizationProvider.GetAuthorizationHeader("PUT", "127.0.0.1:9000", $"/rekaz/{id}", timestampUTC, data);
-
-        // string uri = $"http://127.0.0.1:9000/rekaz/{id}";
-
-        // var contentBytes = System.Text.Encoding.UTF8.GetBytes(data);
-        // var content = new ByteArrayContent(contentBytes);
-
-        // HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, uri)
-        // {
-        //     Content = content
-        // };
-        // request.Headers.TryAddWithoutValidation("Authorization", authorizationHeader);
-
-        // request.Headers.Host = "127.0.0.1:9000";
-        // request.Headers.Add("x-amz-content-sha256", "UNSIGNED-PAYLOAD");
-        // request.Headers.Add("x-amz-date", timestampUTC.ToString("yyyyMMddTHHmmssZ"));
-
-        string method = "PUT";
-        string host = "localhost:9000"; // Port included for local development
-        string bucket = "rekaz";
-        string path = $"/{bucket}/{id}";
-        DateTime requestTime = DateTime.UtcNow;
-
-        var request = _authorizationProvider.CreateS3Request(method, host,
-            path,
-            requestTime,
-            payload: data,
-            region: "us-east-1");
+        var request = _s3RequestProvider.Put(id, data);
 
         var res = await _httpClient.SendAsync(request);
-        var requestStr = request.ToString();
-        Console.WriteLine($"Request: {requestStr}");
 
         if (!res.IsSuccessStatusCode)
         {
             string error = await res.Content.ReadAsStringAsync();
-            return ServiceResult.Failure($"{error}");
+            return Result<FileMetadata>.Failure($"{error}");
         }
 
         await _dao.Create(file);
 
-        return ServiceResult.Ok();
+        return Result<FileMetadata>.Ok(file);
     }
 }

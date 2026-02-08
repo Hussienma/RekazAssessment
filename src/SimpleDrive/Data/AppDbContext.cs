@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using SimpleDrive.Entities;
 
 namespace SimpleDrive.Data;
@@ -11,4 +12,6 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<FileMetadata> Files => Set<FileMetadata>();
+
+    public DbSet<FileRecord> Records => Set<FileRecord>();
 }
