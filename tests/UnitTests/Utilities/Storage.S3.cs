@@ -2,10 +2,12 @@
 using SimpleDrive.Interfaces;
 using Moq;
 using Microsoft.Extensions.Configuration;
+using SimpleDrive.DTOs;
+using SimpleDrive.Utils;
 
 namespace UnitTests;
 
-public class StorageTests
+public class S3StorageUtilsTests
 {
     [Fact]
     public void Build_CanonicalRequestBuilder_ReturnsExpectedFormat()
@@ -28,7 +30,7 @@ public class StorageTests
     public void SignatureProvider_GetSignature_ReturnsExpectedSignature(string method, string path, string queries, string headers, string payload, string region, string service, string expected)
     {
         var inMemorySettings = new Dictionary<string, string?> {
-    {"S3:AccessKeySecret", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"},
+    {"StorageSettings:S3:AccessKeySecret", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"},
 };
 
         IConfiguration configuration = new ConfigurationBuilder()
@@ -42,9 +44,9 @@ public class StorageTests
     }
 
     [Theory]
-    [InlineData("GET", "s3.amazonaws.com", "/mybucket/file.txt", "us-east-1", "s3")]
-    [InlineData("POST", "dynamodb.us-west-2.amazonaws.com", "/", "us-west-2", "dynamodb")]
-    public void GetAuthorizationHeader_ReturnsValidFormat(string method, string host, string path, string region, string service)
+    [InlineData("GET", "s3.amazonaws.com", "/mybucket", "/file.txt", "us-east-1", "s3")]
+    [InlineData("POST", "dynamodb.us-west-2.amazonaws.com", "", "/", "us-west-2", "dynamodb")]
+    public void GetAuthorizationHeader_ReturnsValidFormat(string method, string host, string bucket, string path, string region, string service)
     {
         var mockSignatureProvider = new Mock<ISignatureProvider>();
         string dummySignature = "mocked_signature_12345";
@@ -54,7 +56,7 @@ public class StorageTests
             .Returns(dummySignature);
 
         var inMemorySettings = new Dictionary<string, string?> {
-    {"S3:AccessKeyID", "access-key-id"},
+    {"StorageSettings:S3:AccessKeyID", "access-key-id"}, {"StorageSettings:S3:Host", host}, {"StorageSettings:S3:Bucket", bucket}, {"StorageSettings:S3:Region", region},
 };
 
         IConfiguration configuration = new ConfigurationBuilder()
@@ -71,5 +73,58 @@ public class StorageTests
         Assert.Contains($"Credential=access-key-id/{date}/{region}/{service}/aws4_request", result);
         Assert.Contains("SignedHeaders=", result);
         Assert.EndsWith($"Signature={dummySignature}", result);
+    }
+       
+    [Theory]
+    [InlineData("A", "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd")]
+    [InlineData("ABC", "b5d4045c3f466fa91fe2cc6abe79232a1a57cdf104f7a26e716e0a1e2789df78")]
+    [InlineData("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")]
+    public void HexSHA256_String_ReturnsExpectedHex(string input, string expected)
+    {
+        var result = Encryption.SHA256Hash(input);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ValidateUploadRequest_ShouldReturnFailure_WhenIdIsMissing(string invalidId)
+    {
+        var request = new FileUploadRequest { Id = invalidId, Data = "SGVsbG8=" };
+
+        var result = Validation.ValidateUploadRequest(request);
+
+        Assert.False(result.Success);
+        Assert.Equal("ID is required", result.Message);
+    }
+
+    [Fact]
+    public void ValidateUploadRequest_ShouldReturnFailure_WhenDataIsNotBase64()
+    {
+        var request = new FileUploadRequest 
+        { 
+            Id = "/123", 
+            Data = "Not-Base64-Content-!@#$" 
+        };
+
+        var result = Validation.ValidateUploadRequest(request);
+
+        Assert.False(result.Success);
+    }
+
+    [Fact]
+    public void ValidateUploadRequest_ShouldReturnOk_WhenRequestIsValid()
+    {
+        var request = new FileUploadRequest 
+        { 
+            Id = "file-001", 
+            Data = "SGVsbG8gU2ltcGxlIFN0b3JhZ2UgV29ybGQh"
+        };
+
+        var result = Validation.ValidateUploadRequest(request);
+
+        Assert.True(result.Success);
     }
 }

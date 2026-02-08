@@ -2,7 +2,7 @@ using SimpleDrive.Entities;
 
 namespace SimpleDrive.Interfaces;
 
-public interface IFileDao
+public interface IFileMetadataDao
 {
     Task<FileMetadata> GetById(string id);
 

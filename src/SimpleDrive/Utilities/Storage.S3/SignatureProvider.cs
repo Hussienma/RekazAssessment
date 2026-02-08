@@ -11,7 +11,7 @@ public class SignatureProvider : ISignatureProvider
 
     public SignatureProvider(IConfiguration config)
     {
-        _accessSecret = config.GetValue<string>("S3:AccessKeySecret")!;
+        _accessSecret = config.GetValue<string>("StorageSettings:S3:AccessKeySecret")!;
     }
 
     private string GetStringToSign(string canonicalRequest, string timestampISO8601, string region, string service)

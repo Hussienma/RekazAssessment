@@ -15,10 +15,10 @@ public class S3RequestProvider : IS3RequestProvider
 
     public S3RequestProvider(IConfiguration config, ISignatureProvider signatureProvider)
     {
-        _accessKeyId = config.GetValue<string>("S3:AccessKeyID")!;
-        _host = config.GetValue<string>("S3:Host")!;
-        _bucket= config.GetValue<string>("S3:Bucket")!;
-        _region = config.GetValue<string>("S3:Region")!;
+        _accessKeyId = config.GetValue<string>("StorageSettings:S3:AccessKeyID")!;
+        _host = config.GetValue<string>("StorageSettings:S3:Host")!;
+        _bucket= config.GetValue<string>("StorageSettings:S3:Bucket")!;
+        _region = config.GetValue<string>("StorageSettings:S3:Region")!;
 
         _signatureProvider = signatureProvider;
     }

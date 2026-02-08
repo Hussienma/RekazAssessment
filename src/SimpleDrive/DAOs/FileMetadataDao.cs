@@ -4,11 +4,11 @@ using SimpleDrive.Interfaces;
 
 namespace SimpleDrive.DAOs;
 
-public class FileDao : IFileDao
+public class FileMetadataDao : IFileMetadataDao
 {
     AppDbContext _db;
 
-    public FileDao(AppDbContext context)
+    public FileMetadataDao(AppDbContext context)
     {
         _db = context;
     }

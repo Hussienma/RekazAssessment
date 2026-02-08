@@ -2,6 +2,6 @@ namespace SimpleDrive.DTOs;
 
 public record FileUploadRequest
 {
-    public string id { get; set; }
-    public string data { get; set; }
+    public string Id { get; set; }
+    public string Data { get; set; }
 }

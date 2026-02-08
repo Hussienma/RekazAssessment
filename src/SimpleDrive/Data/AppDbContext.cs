@@ -13,5 +13,4 @@ public class AppDbContext : DbContext
 
     public DbSet<FileMetadata> Files => Set<FileMetadata>();
 
-    public DbSet<FileRecord> Records => Set<FileRecord>();
 }

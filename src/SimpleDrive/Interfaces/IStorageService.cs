@@ -6,7 +6,7 @@ namespace SimpleDrive.Interfaces;
 
 public interface IStorageService
 {
-    public Task<Result<FileMetadata>> UploadFileAsync(string id, string data);
+    public Task<Result<FileMetadata>> UploadFileAsync(FileUploadRequest request);
 
-    public Task<Result<GetFileResponse>> GetFileById(string id);
+    public Task<Result<FileGetResponse>> GetFileById(string id);
 }
