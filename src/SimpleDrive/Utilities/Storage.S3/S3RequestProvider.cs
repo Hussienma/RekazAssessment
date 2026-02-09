@@ -10,6 +10,7 @@ public class S3RequestProvider : IS3RequestProvider
     private string _host;
     private string _bucket;
     private string _region;
+    private bool _isHttps;
 
     private ISignatureProvider _signatureProvider;
 
@@ -19,6 +20,7 @@ public class S3RequestProvider : IS3RequestProvider
         _host = config.GetValue<string>("StorageSettings:S3:Host")!;
         _bucket= config.GetValue<string>("StorageSettings:S3:Bucket")!;
         _region = config.GetValue<string>("StorageSettings:S3:Region")!;
+        _isHttps = config.GetValue<bool>("StorageSettings:S3:Https")!;
 
         _signatureProvider = signatureProvider;
     }
@@ -56,7 +58,8 @@ public class S3RequestProvider : IS3RequestProvider
         string payload = "")
     {
         string path = $"/{_bucket}/{fileId}";
-        var requestUri = new Uri($"http://{_host}{path}");
+        string protocol = _isHttps ? "https" : "http";
+        var requestUri = new Uri($"{protocol}://{_host}{path}");
         var request = new HttpRequestMessage(new HttpMethod(method), requestUri);
 
         DateTime timestampUTC = DateTime.UtcNow;
