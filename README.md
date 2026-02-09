@@ -1,4 +1,8 @@
 # Simple Drive API - .NET
+![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)
+![EF Core](https://img.shields.io/badge/EF%20Core-Entity%20Framework-512BD4?logo=dotnet&logoColor=white)
+![xUnit](https://img.shields.io/badge/xUnit-2.9.3-007ACC?logo=xunit&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?logo=sqlite&logoColor=white)
 
 ## Introduction
 This software is an api that uploads files, sent as base64 blobs, into multiple storage options: S3, Local Storage, and Database. The storage option should be configured by changing `appsettings.json` "StorageSettings:StorageOption" to one of three values: "S3", "LOCAL", "DATABASE".
