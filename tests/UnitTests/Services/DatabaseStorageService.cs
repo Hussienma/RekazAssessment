@@ -4,6 +4,8 @@ using SimpleDrive.Services;
 using SimpleDrive.Entities;
 using SimpleDrive.DTOs;
 
+namespace UnitTests.Services;
+
 public class DatabaseStorageServiceTests
 {
     private readonly Mock<IFileRecordDao> _mockRecordDao;

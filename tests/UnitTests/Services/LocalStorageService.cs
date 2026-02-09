@@ -4,7 +4,8 @@ using SimpleDrive.Services;
 using SimpleDrive.Entities;
 using SimpleDrive.DTOs;
 using Microsoft.Extensions.Configuration;
-using Xunit.Sdk;
+
+namespace UnitTests.Services;
 
 public class LocalStorageServiceTests
 {

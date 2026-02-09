@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using SimpleDrive.DTOs;
 using SimpleDrive.Utils;
 
-namespace UnitTests;
+namespace UnitTests.Utils;
 
 public class S3StorageUtilsTests
 {

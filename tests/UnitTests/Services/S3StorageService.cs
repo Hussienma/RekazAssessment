@@ -1,13 +1,13 @@
 
 using System.Net;
-using Castle.Core.Configuration;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using SimpleDrive.DTOs;
 using SimpleDrive.Entities;
 using SimpleDrive.Interfaces;
 using SimpleDrive.Services;
+
+namespace UnitTests.Services;
 
 public class S3StorageServiceTests
 {

@@ -6,6 +6,8 @@ using SimpleDrive.Common;
 using SimpleDrive.Entities;
 using Microsoft.Extensions.Configuration;
 
+namespace UnitTests.Controllers;
+
 public class BlobControllerTests
 {
     private readonly Mock<IStorageService> _mockStorageService;
